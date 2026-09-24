@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GMAO - Maintenance Hospitalière</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen">
+
+  <!-- Header -->
+  <header class="bg-blue-900 text-white p-4 shadow-md sticky top-0 z-50">
+    <div class="max-w-6xl mx-auto flex justify-between items-center">
+      <div class="flex items-center space-x-3">
+        <i class="fa-solid fa-hospital text-2xl text-blue-300"></i>
+        <div>
+          <h1 class="font-bold text-lg leading-tight">GMAO Maintenance</h1>
+          <p class="text-xs text-blue-200">Gestion des Interventions & Équipements</p>
+        </div>
+      </div>
+      <span class="bg-blue-800 text-xs px-2.5 py-1 rounded-full border border-blue-600">v1.0</span>
+    </div>
+  </header>
+
+  <!-- Navigation Bar -->
+  <div class="max-w-6xl mx-auto p-4">
+    <div class="flex space-x-2 bg-slate-200 p-1 rounded-xl mb-6">
+      <button onclick="switchTab('tab-demandes')" id="btn-tab-demandes" class="flex-1 py-2 text-sm font-semibold rounded-lg bg-white text-blue-900 shadow-sm transition">
+        <i class="fa-solid fa-screwdriver-wrench mr-1"></i> Interventions
+      </button>
+      <button onclick="switchTab('tab-nouvelle')" id="btn-tab-nouvelle" class="flex-1 py-2 text-sm font-semibold rounded-lg text-slate-600 hover:text-slate-900 transition">
+        <i class="fa-solid fa-circle-plus mr-1"></i> Nouveau Ticket
+      </button>
+      <button onclick="switchTab('tab-machines')" id="btn-tab-machines" class="flex-1 py-2 text-sm font-semibold rounded-lg text-slate-600 hover:text-slate-900 transition">
+        <i class="fa-solid fa-barcode mr-1"></i> Fiches Équipements
+      </button>
+    </div>
+
+    <!-- TAB 1: LISTE DES DEMANDES & INTERVENTIONS -->
+    <div id="tab-demandes" class="space-y-4">
+      <div class="flex justify-between items-center mb-2">
+        <h2 class="text-lg font-bold text-slate-800">Tickets & Bons de Réparation</h2>
+        <span id="ticket-count" class="text-xs font-semibold bg-blue-100 text-blue-800 px-2 py-1 rounded-md">0 ticket(s)</span>
+      </div>
+      
+      <div id="tickets-container" class="space-y-3">
+        <!-- Les tickets s'affichent dynamiquement ici -->
+      </div>
+    </div>
+
+    <!-- TAB 2: NOUVELLE DEMANDE (POUR LES SERVICES) -->
+    <div id="tab-nouvelle" class="hidden bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+      <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center">
+        <i class="fa-solid fa-file-signature text-blue-600 mr-2"></i> Créer un Ticket de Réparation
+      </h2>
+      <form id="form-demande" onsubmit="creerDemande(event)" class="space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Étage</label>
+            <select id="demande-etage" required class="w-full border border-slate-300 rounded-lg p-2.5 bg-slate-50 focus:bg-white focus:outline-blue-600">
+              <option value="">Sélectionner un étage</option>
+              <option value="Sous-sol (S-1)">Sous-sol (S-1)</option>
+              <option value="Rez-de-chaussée (RDC)">Rez-de-chaussée (RDC)</option>
+              <option value="1er Étage">1er Étage</option>
+              <option value="2ème Étage">2ème Étage</option>
+              <option value="3ème Étage">3ème Étage</option>
+              <option value="4ème Étage">4ème Étage</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Service / Département</label>
+            <input type="text" id="demande-service" placeholder="Ex: Urgences, Bloc, Buanderie, Radio" required class="w-full border border-slate-300 rounded-lg p-2.5 bg-slate-50 focus:bg-white focus:outline-blue-600">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Code Machine / Référence</label>
+            <input type="text" id="demande-code" placeholder="Ex: MAC-01, CLIM-04, ELEC-22" required class="w-full border border-slate-300 rounded-lg p-2.5 bg-slate-50 focus:bg-white focus:outline-blue-600 uppercase font-mono">
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Priorité</label>
+            <select id="demande-priorite" class="w-full border border-slate-300 rounded-lg p-2.5 bg-slate-50 focus:bg-white focus:outline-blue-600">
+              <option value="Normale">Normale</option>
+              <option value="Urgente">Urgente</option>
+              <option value="Très Urgente (Critique)">Très Urgente (Critique)</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Description de la Panne</label>
+          <textarea id="demande-desc" rows="3" placeholder="Décrivez le problème constaté..." required class="w-full border border-slate-300 rounded-lg p-2.5 bg-slate-50 focus:bg-white focus:outline-blue-600"></textarea>
+        </div>
+
+        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg shadow transition">
+          Envoyer la Demande
+        </button>
+      </form>
+    </div>
+
+    <!-- TAB 3: RECHERCHE MACHINE & HISTORIQUE -->
+    <div id="tab-machines" class="hidden space-y-4">
+      <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+        <label class="block text-sm font-bold text-slate-700 mb-2">Rechercher une Machine par Code :</label>
+        <div class="flex space-x-2">
+          <input type="text" id="search-code" placeholder="Entrez le code machine (Ex: MAC-01)" class="flex-1 border border-slate-300 rounded-lg p-2.5 uppercase font-mono focus:outline-blue-600">
+          <button onclick="rechercherMachine()" class="bg-slate-800 text-white px-5 py-2.5 rounded-lg font-bold hover:bg-slate-900 transition">
+            <i class="fa-solid fa-magnifying-glass"></i> Chercher
+          </button>
+        </div>
+      </div>
+
+      <div id="machine-details" class="hidden bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+        <!-- Historique de la machine s'affiche ici -->
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: CLÔTURE DE L'INTERVENTION (TECHNIQUE) -->
+  <div id="modal-cloture" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-lg rounded-2xl shadow-xl overflow-hidden">
+      <div class="bg-slate-800 text-white px-6 py-4 flex justify-between items-center">
+        <h3 class="font-bold text-base">Clôturer l'Intervention</h3>
+        <button onclick="fermerModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+      </div>
+      <form id="form-cloture" onsubmit="enregistrerCloture(event)" class="p-6 space-y-4">
+        <input type="hidden" id="cloture-ticket-id">
+        
+        <div>
+          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Technicien / Responsable</label>
+          <input type="text" id="cloture-tech" placeholder="Nom du technicien" required class="w-full border border-slate-300 rounded-lg p-2.5 focus:outline-blue-600">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Travail Effectué / Réparation</label>
+          <textarea id="cloture-travail" rows="2" placeholder="Détail des réparations faites..." required class="w-full border border-slate-300 rounded-lg p-2.5 focus:outline-blue-600"></textarea>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Pièces Utilisées / Matériel</label>
+          <input type="text" id="cloture-pieces" placeholder="Ex: Relais Finder 11-pin, Disjoncteur 16A, Huile..." class="w-full border border-slate-300 rounded-lg p-2.5 focus:outline-blue-600">
+        </div>
+
+        <div class="flex space-x-2 pt-2">
+          <button type="button" onclick="fermerModal()" class="flex-1 border border-slate-300 text-slate-700 py-2.5 rounded-lg font-bold hover:bg-slate-100 transition">Annuler</button>
+          <button type="submit" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-lg font-bold transition">Confirmer & Clôturer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    let tickets = JSON.parse(localStorage.getItem('hospital_tickets')) || [];
+
+    function sauvegarder() {
+      localStorage.setItem('hospital_tickets', JSON.stringify(tickets));
+      afficherTickets();
+    }
+
+    function switchTab(tabId) {
+      ['tab-demandes', 'tab-nouvelle', 'tab-machines'].forEach(id => {
+        document.getElementById(id).classList.add('hidden');
+        document.getElementById('btn-' + id).className = "flex-1 py-2 text-sm font-semibold rounded-lg text-slate-600 hover:text-slate-900 transition";
+      });
+      document.getElementById(tabId).classList.remove('hidden');
+      document.getElementById('btn-' + tabId).className = "flex-1 py-2 text-sm font-semibold rounded-lg bg-white text-blue-900 shadow-sm transition";
+    }
+
+    function creerDemande(e) {
+      e.preventDefault();
+      const nouveau = {
+        id: Date.now(),
+        date: new Date().toLocaleDateString('fr-FR') + ' ' + new Date().toLocaleTimeString('fr-FR', {hour: '2-digit', minute:'2-digit'}),
+        etage: document.getElementById('demande-etage').value,
+        service: document.getElementById('demande-service').value,
+        code: document.getElementById('demande-code').value.toUpperCase(),
+        priorite: document.getElementById('demande-priorite').value,
+        desc: document.getElementById('demande-desc').value,
+        statut: 'En attente',
+        technicien: '',
+        travail: '',
+        pieces: '',
+        dateCloture: ''
+      };
+      tickets.unshift(nouveau);
+      sauvegarder();
+      document.getElementById('form-demande').reset();
+      switchTab('tab-demandes');
+    }
+
+    function afficherTickets() {
+      const container = document.getElementById('tickets-container');
+      document.getElementById('ticket-count').innerText = `${tickets.length} ticket(s)`;
+      container.innerHTML = '';
+
+      if (tickets.length === 0) {
+        container.innerHTML = `<div class="text-center p-8 bg-white rounded-xl border border-dashed border-slate-300 text-slate-400">Aucune demande enregistrée pour le moment.</div>`;
+        return;
+      }
+
+      tickets.forEach(t => {
+        const isCloture = t.statut === 'Terminé';
+        const badgeColor = isCloture ? 'bg-emerald-100 text-emerald-800' : (t.priorite.includes('Critique') || t.priorite === 'Urgente' ? 'bg-red-100 text-red-800' : 'bg-amber-100 text-amber-800');
+        
+        container.innerHTML += `
+          <div class="bg-white p-5 rounded-xl border ${isCloture ? 'border-slate-200' : 'border-blue-200 shadow-sm'} space-y-3">
+            <div class="flex justify-between items-start">
+              <div>
+                <span class="inline-block text-xs font-bold font-mono bg-slate-100 text-slate-700 px-2 py-0.5 rounded border mb-1">${t.code}</span>
+                <h3 class="font-bold text-slate-900 text-base">${t.service} - <span class="text-blue-700">${t.etage}</span></h3>
+                <p class="text-xs text-slate-400">${t.date}</p>
+              </div>
+              <span class="text-xs px-2.5 py-1 rounded-full font-bold ${badgeColor}">${t.statut}</span>
+            </div>
+
+            <div class="bg-slate-50 p-3 rounded-lg text-sm text-slate-700 border border-slate-100">
+              <span class="font-bold text-xs text-slate-500 block mb-1">PROBLÈME SIGNALÉ:</span>
+              ${t.desc}
+            </div>
+
+            ${isCloture ? `
+              <div class="bg-emerald-50/70 p-3 rounded-lg text-sm border border-emerald-100 space-y-1">
+                <div class="text-xs text-emerald-800 font-bold"><i class="fa-solid fa-check-circle"></i> Intervention terminée par: ${t.technicien} (${t.dateCloture})</div>
+                <div class="text-slate-700"><span class="font-semibold text-xs text-slate-500">RÉPARATION:</span> ${t.travail}</div>${t.pieces ? `<div class="text-slate-700 text-xs"><span class="font-semibold text-slate-500">PIÈCES:</span> ${t.pieces}</div>` : ''}
+              </div>
+            ` : `
+              <div class="pt-2 flex justify-end">
+                <button onclick="ouvrirModalCloture(${t.id})" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold px-4 py-2 rounded-lg transition flex items-center">
+                  <i class="fa-solid fa-wrench mr-2"></i> Traiter / Clôturer
+                </button>
+              </div>
+            `}
+          </div>
+        `;
+      });
+    }
+
+    function ouvrirModalCloture(id) {
+      document.getElementById('cloture-ticket-id').value = id;
+      document.getElementById('modal-cloture').classList.remove('hidden');
+    }
+
+    function fermerModal() {
+      document.getElementById('modal-cloture').classList.add('hidden');
+      document.getElementById('form-cloture').reset();
+    }
+
+    function enregistrerCloture(e) {
+      e.preventDefault();
+      const id = parseInt(document.getElementById('cloture-ticket-id').value);
+      const ticket = tickets.find(t => t.id === id);
+      if (ticket) {
+        ticket.statut = 'Terminé';
+        ticket.technicien = document.getElementById('cloture-tech').value;
+        ticket.travail = document.getElementById('cloture-travail').value;
+        ticket.pieces = document.getElementById('cloture-pieces').value;
+        ticket.dateCloture = new Date().toLocaleDateString('fr-FR') + ' ' + new Date().toLocaleTimeString('fr-FR', {hour: '2-digit', minute:'2-digit'});
+        sauvegarder();
+        fermerModal();
+      }
+    }
+
+    function rechercherMachine() {
+      const query = document.getElementById('search-code').value.trim().toUpperCase();
+      const resultDiv = document.getElementById('machine-details');
+      if (!query) return;
+
+      const pannes = tickets.filter(t => t.code === query);
+      resultDiv.classList.remove('hidden');
+
+      if (pannes.length === 0) {
+        resultDiv.innerHTML = `<p class="text-slate-500 text-sm">Aucun historique trouvé pour la machine: <b>${query}</b></p>`;
+        return;
+      }
+
+      const latest = pannes[0];
+      let html = `
+        <div class="border-b pb-4 mb-4">
+          <span class="text-xs font-bold text-blue-600 uppercase">Fiche Machine</span>
+          <h3 class="text-xl font-black text-slate-800 font-mono">${query}</h3>
+          <p class="text-sm text-slate-600">Localisation récente : <b>${latest.service}</b> (${latest.etage})</p>
+        </div>
+        <h4 class="font-bold text-sm text-slate-700 mb-3">Historique des Pannes & Réparations (${pannes.length}) :</h4>
+        <div class="space-y-2">
+      `;
+
+      pannes.forEach(p => {
+        html += `
+          <div class="p-3 bg-slate-50 rounded-lg border text-sm space-y-1">
+            <div class="flex justify-between text-xs text-slate-500">
+              <span>${p.date}</span>
+              <span class="font-bold ${p.statut === 'Terminé' ? 'text-emerald-600' : 'text-amber-600'}">${p.statut}</span>
+            </div>
+            <div><b>Problème:</b> ${p.desc}</div>
+            ${p.statut === 'Terminé' ? `<div class="text-xs text-slate-600"><b>Réparation:</b> ${p.travail} | <b>Pièces:</b> ${p.pieces \vert{}\vert{} 'Aucune'} (Par:${p.technicien})</div>` : ''}
+          </div>
+        `;
+      });
+
+      html += `</div>`;
+      resultDiv.innerHTML = html;
+    }
+
+    // Chargement initial
+    afficherTickets();
+  </script>
+</body>
+</html>
